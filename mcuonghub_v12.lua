@@ -1,164 +1,188 @@
 --[[
     MCUONGHUB HUB V5: THE NEXT GEN
-    Bản quyền thuộc về Mcuonghub
+    UI Style: Speed Hub / Modern Dark
+    Game: Grow a Garden
 ]]
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 
--- 1. TẠO GIAO DIỆN CHUẨN SPEED HUB
+-- 1. XÓA UI CŨ
 if Player.PlayerGui:FindFirstChild("McuonghubV5") then Player.PlayerGui.McuonghubV5:Destroy() end
-local ScreenGui = Instance.new("ScreenGui", Player.PlayerGui); ScreenGui.Name = "McuonghubV5"
 
+local ScreenGui = Instance.new("ScreenGui", Player.PlayerGui)
+ScreenGui.Name = "McuonghubV5"
+
+-- MAIN FRAME
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 520, 0, 360)
-Main.Position = UDim2.new(0.5, -260, 0.4, -180)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Main.Size = UDim2.new(0, 550, 0, 380)
+Main.Position = UDim2.new(0.5, -275, 0.4, -190)
+Main.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
-Instance.new("UICorner", Main)
+local MainCorner = Instance.new("UICorner", Main)
+MainCorner.CornerRadius = UDim.new(0, 12)
 
--- HEADER
-local Header = Instance.new("Frame", Main)
-Header.Size = UDim2.new(1, 0, 0, 45)
-Header.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-Instance.new("UICorner", Header)
+-- TOP BAR (Giống ảnh)
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 50)
+TopBar.BackgroundTransparency = 1
 
-local Title = Instance.new("TextLabel", Header)
+local Title = Instance.new("TextLabel", TopBar)
 Title.Text = "⚡ mcuonghub HUB v5: THE NEXT GEN ⚡"
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.TextColor3 = Color3.fromRGB(255, 170, 0)
+Title.Size = UDim2.new(0.7, 0, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.TextColor3 = Color3.fromRGB(255, 180, 50)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 
--- THANH TABS (Giống ảnh bạn gửi)
-local TabFrame = Instance.new("Frame", Main)
-TabFrame.Size = UDim2.new(1, -20, 0, 40)
-TabFrame.Position = UDim2.new(0, 10, 0, 55)
-TabFrame.BackgroundTransparency = 1
+-- TAB CONTAINER (Giống ảnh)
+local TabBar = Instance.new("Frame", Main)
+TabBar.Size = UDim2.new(1, -20, 0, 45)
+TabBar.Position = UDim2.new(0, 10, 0, 55)
+TabBar.BackgroundTransparency = 1
 
-local UIList = Instance.new("UIListLayout", TabFrame)
-UIList.FillDirection = Enum.FillDirection.Horizontal
-UIList.Padding = UDim.new(0, 8)
+local UIListTab = Instance.new("UIListLayout", TabBar)
+UIListTab.FillDirection = Enum.FillDirection.Horizontal
+UIListTab.Padding = UDim.new(0, 10)
 
--- BIẾN ĐIỀU KHIỂN
-_G.AutoClaim = false
-_G.AutoSell = false
-_G.SelectedPet = "Chọn Pet..."
-_G.Price = 1000
-
-local function CreateTab(name, icon)
-    local b = Instance.new("TextButton", TabFrame)
-    b.Text = icon .. " " .. name
-    b.Size = UDim2.new(0, 110, 1, 0)
-    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.Font = Enum.Font.SourceSansBold
-    Instance.new("UICorner", b)
-    return b
+local function CreateTab(name, icon, isSelected)
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Text = icon .. " " .. name
+    btn.Size = UDim2.new(0, 120, 1, 0)
+    btn.BackgroundColor3 = isSelected and Color3.fromRGB(60, 60, 60) or Color3.fromRGB(35, 35, 35)
+    btn.TextColor3 = isSelected and Color3.new(1, 1, 1) or Color3.fromRGB(200, 200, 200)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    local c = Instance.new("UICorner", btn)
+    c.CornerRadius = UDim.new(0, 20) -- Bo tròn cực mạnh giống ảnh
+    return btn
 end
 
-local Tab1 = CreateTab("Trồng Trọt", "🌱")
-local Tab2 = CreateTab("Giao Thương", "💰")
+local TabFarm = CreateTab("Trồng Trọt", "🌱", true)
+local TabTrade = CreateTab("Giao Thương", "💰", false)
+local TabPet = CreateTab("Thú Cưng", "🐾", false)
 
--- NỘI DUNG TABS
-local Container = Instance.new("Frame", Main)
-Container.Size = UDim2.new(1, -20, 1, -120)
-Container.Position = UDim2.new(0, 10, 0, 105)
-Container.BackgroundTransparency = 1
+-- CONTENT AREA
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1, -30, 1, -120)
+Content.Position = UDim2.new(0, 15, 0, 110)
+Content.BackgroundTransparency = 1
 
-local UIListCont = Instance.new("UIListLayout", Container)
-UIListCont.Padding = UDim.new(0, 10)
+-- DROPDOWN (Giống ảnh bạn gửi)
+local function CreateDropdown(title, items, callback)
+    local DropFrame = Instance.new("Frame", Content)
+    DropFrame.Size = UDim2.new(1, 0, 0, 45)
+    DropFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    local c = Instance.new("UICorner", DropFrame)
 
--- DROPDOWN (CHỌN PET)
-local Dropdown = Instance.new("TextButton", Container)
-Dropdown.Text = "🎯 " .. _G.SelectedPet .. " ▽"
-Dropdown.Size = UDim2.new(1, 0, 0, 45)
-Dropdown.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Dropdown.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", Dropdown)
+    local dTitle = Instance.new("TextLabel", DropFrame)
+    dTitle.Text = "🎯 " .. title
+    dTitle.Size = UDim2.new(1, -50, 1, 0)
+    dTitle.Position = UDim2.new(0, 10, 0, 0)
+    dTitle.TextColor3 = Color3.new(1, 1, 1)
+    dTitle.TextXAlignment = Enum.TextXAlignment.Left
+    dTitle.BackgroundTransparency = 1
 
-local PetList = Instance.new("ScrollingFrame", Container)
-PetList.Size = UDim2.new(1, 0, 0, 0) -- Ẩn ban đầu
-PetList.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-PetList.Visible = false
-Instance.new("UIListLayout", PetList)
+    local arrow = Instance.new("TextLabel", DropFrame)
+    arrow.Text = "∧"
+    arrow.Size = UDim2.new(0, 40, 1, 0)
+    arrow.Position = UDim2.new(1, -40, 0, 0)
+    arrow.TextColor3 = Color3.new(1,1,1)
+    arrow.BackgroundTransparency = 1
 
-Dropdown.MouseButton1Click:Connect(function()
-    PetList.Visible = not PetList.Visible
-    PetList.Size = PetList.Visible and UDim2.new(1, 0, 0, 120) or UDim2.new(1, 0, 0, 0)
-    
-    -- Quét Pet thật trong game
-    for _, v in pairs(PetList:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
-    local pets = {"Dog", "Cat", "Dragon", "Tomato", "Potato", "Carrot"} -- Danh sách mẫu
-    for _, name in pairs(pets) do
-        local p = Instance.new("TextButton", PetList)
-        p.Text = name; p.Size = UDim2.new(1, 0, 0, 35); p.BackgroundColor3 = Color3.fromRGB(45, 45, 45); p.TextColor3 = Color3.new(1,1,1)
-        p.MouseButton1Click:Connect(function()
-            _G.SelectedPet = name
-            Dropdown.Text = "🎯 " .. name .. " ▽"
-            PetList.Visible = false
-            PetList.Size = UDim2.new(1, 0, 0, 0)
+    local itemHolder = Instance.new("Frame", Content)
+    itemHolder.Size = UDim2.new(1, 0, 0, 0)
+    itemHolder.ClipsDescendants = true
+    itemHolder.Visible = false
+    itemHolder.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    local uil = Instance.new("UIListLayout", itemHolder)
+
+    DropFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            itemHolder.Visible = not itemHolder.Visible
+            itemHolder.Size = itemHolder.Visible and UDim2.new(1, 0, 0, #items * 35) or UDim2.new(1, 0, 0, 0)
+        end
+    end)
+
+    for _, itemName in pairs(items) do
+        local iBtn = Instance.new("TextButton", itemHolder)
+        iBtn.Text = itemName
+        iBtn.Size = UDim2.new(1, 0, 0, 35)
+        iBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        iBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        iBtn.BorderSizePixel = 0
+        iBtn.MouseButton1Click:Connect(function()
+            dTitle.Text = "🎯 " .. title .. ": " .. itemName
+            itemHolder.Visible = false
+            itemHolder.Size = UDim2.new(1, 0, 0, 0)
+            callback(itemName)
         end)
     end
-end)
+end
 
--- INPUT GIÁ
-local PriceInput = Instance.new("TextBox", Container)
-PriceInput.PlaceholderText = "Nhập giá Token..."
-PriceInput.Size = UDim2.new(1, 0, 0, 45)
-PriceInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-PriceInput.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", PriceInput)
-PriceInput.FocusLost:Connect(function() _G.Price = tonumber(PriceInput.Text) or 1000 end)
+-- BIẾN LOGIC
+_G.SelectedPlant = "Tomato"
+_G.SelectedPet = "Chưa chọn"
+_G.Price = 1000
+_G.AutoClaim = false
+_G.AutoSell = false
 
--- TOGGLES
+-- THIẾT LẬP NỘI DUNG (TAB TRỒNG TRỌT)
+CreateDropdown("Chọn Loại Cây Muốn Trồng", {"Tomato", "Potato", "Carrot", "Onion"}, function(v) _G.SelectedPlant = v end)
+
+-- THIẾT LẬP NỘI DUNG (TAB GIAO THƯƠNG)
 local function CreateToggle(name, callback)
-    local t = Instance.new("TextButton", Container)
-    t.Text = name .. ": OFF"
-    t.Size = UDim2.new(1, 0, 0, 45); t.BackgroundColor3 = Color3.fromRGB(180, 50, 50); t.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", t)
+    local btn = Instance.new("TextButton", Content)
+    btn.Text = name .. ": OFF"
+    btn.Size = UDim2.new(1, 0, 0, 45)
+    btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSansBold
+    Instance.new("UICorner", btn)
     local s = false
-    t.MouseButton1Click:Connect(function()
+    btn.MouseButton1Click:Connect(function()
         s = not s
-        t.Text = name .. ": " .. (s and "ON" or "OFF")
-        t.BackgroundColor3 = s and Color3.fromRGB(50, 180, 50) or Color3.fromRGB(180, 50, 50)
+        btn.Text = name .. ": " .. (s and "ON" or "OFF")
+        btn.BackgroundColor3 = s and Color3.fromRGB(50, 180, 50) or Color3.fromRGB(180, 50, 50)
         callback(s)
     end)
 end
 
-CreateToggle("Auto Tranh Hàng", function(s) _G.AutoClaim = s end)
-CreateToggle("Auto Bán Pet Đã Chọn", function(s) _G.AutoSell = s end)
+CreateToggle("Auto Tranh Gian Hàng", function(s) _G.AutoClaim = s end)
+CreateToggle("Auto Treo Bán Pet", function(s) _G.AutoSell = s end)
 
--- LOGIC FIX HOẠT ĐỘNG
+-- LOGIC FIX HOẠT ĐỘNG TRONG GAME
 task.spawn(function()
     while task.wait(1.5) do
         if _G.AutoClaim then
-            -- Tự động tìm gian hàng trống trong Grow a Garden
-            for _, b in pairs(workspace:GetDescendants()) do
-                if (b.Name:find("Booth") or b.Name:find("Stall")) and b:FindFirstChild("Owner") then
-                    if b.Owner.Value == "" or b.Owner.Value == nil then
-                        -- Gửi lệnh chiếm
-                        for _, r in pairs(ReplicatedStorage:GetDescendants()) do
-                            if r:IsA("RemoteEvent") and (r.Name:find("Claim") or r.Name:find("Booth")) then
-                                r:FireServer(b)
-                                break
-                            end
+            -- Quét Booths trong Grow a Garden
+            local Booths = workspace:FindFirstChild("Booths") or workspace:FindFirstChild("Stalls")
+            if Booths then
+                for _, b in pairs(Booths:GetChildren()) do
+                    if b:FindFirstChild("Owner") and b.Owner.Value == "" then
+                        -- Tự động tìm lệnh Claim
+                        local r = ReplicatedStorage:FindFirstChild("ClaimBooth", true) or ReplicatedStorage:FindFirstChild("Claim", true)
+                        if r then 
+                            r:FireServer(b) 
+                            -- Teleport tới để tránh lỗi khoảng cách
+                            Player.Character.HumanoidRootPart.CFrame = b.PrimaryPart.CFrame * CFrame.new(0, 3, 0)
                         end
+                        break
                     end
                 end
             end
         end
 
-        if _G.AutoSell and _G.SelectedPet ~= "Chọn Pet..." then
-            -- Gửi lệnh bán Pet
-            for _, r in pairs(ReplicatedStorage:GetDescendants()) do
-                if r:IsA("RemoteEvent") and (r.Name:find("Sell") or r.Name:find("List") or r.Name:find("Post")) then
-                    r:FireServer(_G.SelectedPet, _G.Price)
-                end
-            end
+        if _G.AutoSell and _G.SelectedPet ~= "Chưa chọn" then
+            -- Tự động tìm lệnh ListPet
+            local r = ReplicatedStorage:FindFirstChild("ListPet", true) or ReplicatedStorage:FindFirstChild("SellPet", true)
+            if r then r:FireServer(_G.SelectedPet, _G.Price) end
         end
     end
 end)
