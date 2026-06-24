@@ -1,258 +1,169 @@
--- [[ MCUONGHUB ULTIMATE HUB V5.2 - ADVANCED INPUT & RECONNECT ]] --
+-- [[ CUONGHUB PREMIUM V8.5 - STEAL A BRAINROT (FAKE BUY UPDATE) ]] --
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Khởi tạo Cửa sổ chính
 local Window = Rayfield:CreateWindow({
-   Name = "⚡ mcuonghub HUB v5.2: INPUT EDITION ⚡",
-   LoadingTitle = "Đang cấu hình hộp nhập số lượng...",
+   Name = "⚡ cuonghub Super Premium v8.5: Steal A Brainrot ⚡",
+   LoadingTitle = "Đang tích hợp module Mua Đồ Giả (Fake Purchase)...",
    LoadingSubtitle = "by cuongcuongmanhvu-art",
-   ConfigurationSaving = { Enabled = true, FolderName = "mcuonghub_v5", FileName = "GrowAGarden" },
+   ConfigurationSaving = { Enabled = true, FolderName = "cuonghub_brainrot", FileName = "Config" },
    KeySystem = false
 })
 
--- Biến lưu trữ cấu hình
-_G.isAutoPlant = false
-_G.selectedPlant = "Tomato"
+-- BIẾN TOÀN CỤC (VARIABLES)
+_G.fakeRobuxAmount = 999999
+_G.selectedItemToFakeBuy = "Super VIP Gamepass"
+_G.isAutoSteal = false
+_G.isKillAura = false
+_G.isAutoCollect = false
+_G.selectedPlayer = ""
+_G.walkSpeedValue = 16
 
-_G.isAutoSellToken = false
-_G.selectedCropToSell = "All"
-_G.selectedCurrency = "Token"
-_G.amountToSell = 1 -- Số lượng nông sản cần bán (Mặc định là 1)
-
-_G.isAutoUpPet = false
-_G.selectedPetToUp = "Pet Thường"
-_G.tokenInputAmount = 100 -- Số lượng token cần dùng để up pet (Mặc định)
-
-_G.isAutoOpenBooth = false
-_G.isAntiAFK = true
-_G.isAutoReconnect = true
-
--- ==================== CÁC TAB CHỨC NĂNG CHUYÊN NGHIỆP ==================== --
-local TabFarm = Window:CreateTab("🌱 Trồng Trọt", 4430451143)
-local TabEco = Window:CreateTab("💰 Giao Thương", 4430451143)
-local TabPet = Window:CreateTab("🐾 Thú Cưng", 4430451143)
-local TabMisc = Window:CreateTab("⚙️ Hệ Thống", 4430451143)
+-- ==================== KHỞI TẠO TABS GIAO DIỆN ==================== --
+local TabRobux = Window:CreateTab("💵 Fake Robux & Shop", 4430451143)
+local TabMain = Window:CreateTab("⚡ Auto Steal", 4430451143)
+local TabCombat = Window:CreateTab("⚔️ Combat Troll", 4430451143)
+local TabTp = Window:CreateTab("🌍 Teleport", 4430451143)
+local TabMisc = Window:CreateTab("⚙️ Hệ Thống VIP", 4430451143)
 
 -- ----------------------------------------------------------------------------
--- [TAB 1: DANH MỤC TRỒNG TRỌT]
+-- [TAB 1: FAKE ROBUX & FAKE PURCHASE]
 -- ----------------------------------------------------------------------------
-TabFarm:CreateSection("Cấu Hình Trồng Cây")
+TabRobux:CreateSection("💵 Cấu Hình Số Lượng Robux Giả")
 
-TabFarm:CreateDropdown({
-   Name = "🎯 Chọn Loại Cây Muốn Trồng",
-   Options = {"Tomato", "Potato", "Carrot", "Pumpkin", "Watermelon", "Golden Tree"},
-   CurrentOption = {"Tomato"},
-   MultipleOptions = false,
-   Flag = "PlantSelect",
-   Callback = function(Option) _G.selectedPlant = Option[1] end,
-})
-
-TabFarm:CreateToggle({
-   Name = "🌱 Kích Hoạt Auto Gieo Hạt",
-   CurrentValue = false,
-   Flag = "TogglePlant",
-   Callback = function(Value) _G.isAutoPlant = Value end,
-})
-
-TabFarm:CreateToggle({
-   Name = "🤖 Auto Thu Hoạch",
-   CurrentValue = false,
-   Flag = "ToggleHarvest",
-   Callback = function(Value) _G.isAutoHarvest = Value end,
-})
-
-TabFarm:CreateToggle({
-   Name = "🛡️ Bất Tử Nước",
-   CurrentValue = false,
-   Flag = "ToggleWater",
-   Callback = function(Value) _G.isGodMode = Value end,
-})
-
--- ----------------------------------------------------------------------------
--- [TAB 2: DANH MỤC GIAO THƯƠNG (CÓ HỘP NHẬP SỐ LƯỢNG BÁN)]
--- ----------------------------------------------------------------------------
-TabEco:CreateSection("Cấu Hình Bán Nông Sản")
-
-TabEco:CreateDropdown({
-   Name = "📦 Chọn Vật Phẩm Muốn Bán",
-   Options = {"All", "Tomato", "Potato", "Carrot", "Pumpkin", "Watermelon"},
-   CurrentOption = {"All"},
-   MultipleOptions = false,
-   Flag = "CropSellSelect",
-   Callback = function(Option) _G.selectedCropToSell = Option[1] end,
-})
-
-TabEco:CreateDropdown({
-   Name = "🪙 Chọn Loại Tiền Nhận Được",
-   Options = {"Token", "Coins"},
-   CurrentOption = {"Token"},
-   MultipleOptions = false,
-   Flag = "CurrencySelect",
-   Callback = function(Option) _G.selectedCurrency = Option[1] end,
-})
-
--- [MỚI CHUYÊN NGHIỆP] - Ô nhập số lượng vật phẩm muốn bán
-TabEco:CreateInput({
-   Name = "🔢 Nhập Số Lượng Vật Phẩm Muốn Bán",
-   PlaceholderText = "Ví dụ: 10, 50, 100...",
+TabRobux:CreateInput({
+   Name = "🔢 Nhập Số Robux Muốn Hack (Hiển Thị)",
+   PlaceholderText = "Ví dụ: 999999...",
    RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local num = tonumber(Text)
-      if num then
-         _G.amountToSell = num
-         Rayfield:Notify({Title = "Hệ Thống", Content = "Đã đặt số lượng bán: " .. num, Duration = 2})
-      end
-   end,
+   Callback = function(Text) _G.fakeRobuxAmount = tonumber(Text) or 999999 end,
 })
 
-TabEco:CreateToggle({
-   Name = "💰 Kích Hoạt Auto Treo Bán Đồ",
-   CurrentValue = false,
-   Flag = "ToggleSell",
-   Callback = function(Value) _G.isAutoSellToken = Value end,
-})
-
-TabEco:CreateSection("Quầy Hàng Chợ Đêm")
-
-TabEco:CreateToggle({
-   Name = "🎪 Auto Chiếm & Mở Quầy Hàng (Booth)",
-   CurrentValue = false,
-   Flag = "ToggleBooth",
-   Callback = function(Value) _G.isAutoOpenBooth = Value end,
-})
-
--- ----------------------------------------------------------------------------
--- [TAB 3: DANH MỤC THÚ CƯNG (CÓ HỘP NHẬP SỐ TOKEN)]
--- ----------------------------------------------------------------------------
-TabPet:CreateSection("Nâng Cấp Thú Cưng")
-
-TabPet:CreateDropdown({
-   Name = "🐾 Chọn Loại Pet Cần Up",
-   Options = {"Pet Thường (Dog/Cat)", "Pet Hiếm (Rare)", "Pet Huyền Thoại (Legendary)", "All Pets"},
-   CurrentOption = {"Pet Thường (Dog/Cat)"},
-   MultipleOptions = false,
-   Flag = "PetSelect",
-   Callback = function(Option) _G.selectedPetToUp = Option[1] end,
-})
-
--- [MỚI CHUYÊN NGHIỆP] - Ô nhập số lượng Token giới hạn để Up Pet
-TabPet:CreateInput({
-   Name = "🪙 Nhập Số Token Yêu Cầu Để Up Pet",
-   PlaceholderText = "Nhập số lượng token cần dùng...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local num = tonumber(Text)
-      if num then
-         _G.tokenInputAmount = num
-         Rayfield:Notify({Title = "Hệ Thống", Content = "Đã đặt mức Token giới hạn: " .. num, Duration = 2})
-      end
-   end,
-})
-
-TabPet:CreateToggle({
-   Name = "⚡ Auto Up Cấp Tự Động khi Đủ Token",
-   CurrentValue = false,
-   Flag = "ToggleUpPet",
-   Callback = function(Value) _G.isAutoUpPet = Value end,
-})
-
--- ----------------------------------------------------------------------------
--- [TAB 4: HỆ THỐNG / KẾT NỐI LẠI]
--- ----------------------------------------------------------------------------
-TabMisc:CreateSection("Tiện Ích Treo Máy")
-
-TabMisc:CreateToggle({
-   Name = "🔄 Tự Động Kết Nối Lại Khi Bị Văng (Auto Reconnect)",
-   CurrentValue = true,
-   Flag = "ToggleReconnect",
-   Callback = function(Value) _G.isAutoReconnect = Value end,
-})
-
-TabMisc:CreateSlider({
-   Name = "⚡ Tốc Độ Chạy (WalkSpeed)",
-   Min = 16, Max = 250, DefaultValue = 16, Color = Color3.fromRGB(0, 255, 0),
-   Increment = 1, ValueName = "Speed",
-   Callback = function(Value)
-      if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-      end
-   end,
-})
-
--- ==================== VÒNG LẶP HỆ THỐNG LUỒNG NGẦM (LOOP ENGINE) ==================== --
-task.spawn(function()
-   while task.wait(0.5) do
-      local ReplicatedStorage = game:GetService("ReplicatedStorage")
-      local Garden = workspace:FindFirstChild("Plots") or workspace:FindFirstChild("Garden") or workspace:FindFirstChild("PlayerPlots")
-      
-      -- Vòng lặp Farm cây
+TabRobux:CreateButton({
+   Name = "💵 KÍCH HOẠT FAKE ROBUX MÀN HÌNH",
+   Callback = function()
       pcall(function()
-         if Garden then
-            for _, plot in pairs(Garden:GetChildren()) do
-               if _G.isGodMode and plot:FindFirstChild("Water") then plot.Water.Value = 100 end
-               if _G.isAutoPlant and plot:FindFirstChild("Stage") and plot.Stage.Value == 0 then
-                  local plantRemote = ReplicatedStorage:FindFirstChild("Plant") or ReplicatedStorage:FindFirstChild("PlantSeed")
-                  if plantRemote then plantRemote:FireServer(plot, _G.selectedPlant) end 
-               end
-               if _G.isAutoHarvest and plot:FindFirstChild("Stage") and (plot.Stage.Value == 4 or plot.Stage.Value == "Ripe") then
-                  local harvestRemote = ReplicatedStorage:FindFirstChild("Harvest") or plot:FindFirstChild("HarvestEvent")
-                  if harvestRemote then harvestRemote:FireServer(plot) end
-               end
+         local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+         local found = false
+         for _, v in pairs(playerGui:GetDescendants()) do
+            if v:IsA("TextLabel") and (string.find(string.lower(v.Text), "robux") or string.find(string.lower(v.Name), "robux") or string.find(string.lower(v.Name), "money")) then
+               v.Text = "💵 " .. tostring(_G.fakeRobuxAmount) .. " Robux"
+               found = true
             end
+         end
+         if found then
+            Rayfield:Notify({Title = "cuonghub Success", Content = "Đã chỉnh sửa hiển thị thành " .. _G.fakeRobuxAmount .. " Robux!", Duration = 3})
+         else
+            Rayfield:Notify({Title = "cuonghub Info", Content = "Đã ép buộc đồng bộ giao diện hiển thị tiền!", Duration = 3})
          end
       end)
-      
-      -- Xử lý Kinh tế truyền tham số nhập từ Input
+   end,
+})
+
+TabRobux:CreateSection("🛒 Tính Năng Mua Đồ Giả (Fake Purchase)")
+
+TabRobux:CreateDropdown({
+   Name = "🎁 Chọn Vật Phẩm Muốn Mua Giả",
+   Options = {"Super VIP Gamepass", "X100 Brainrot Multiplier", "Godly Weapon Skin", "Infinite Robux Generator Item", "Admin Commands Access"},
+   CurrentOption = {"Super VIP Gamepass"},
+   MultipleOptions = false,
+   Flag = "FakeBuySelect",
+   Callback = function(Option) _G.selectedItemToFakeBuy = Option[1] end,
+})
+
+TabRobux:CreateButton({
+   Name = "🛍️ THỰC HIỆN MUA (Hiện Hoạt Ảnh Khống)",
+   Callback = function()
       pcall(function()
-         if _G.isAutoSellToken then
-            local sellRemote
-            if _G.selectedCurrency == "Token" then
-               sellRemote = ReplicatedStorage:FindFirstChild("SellToken") or ReplicatedStorage:FindFirstChild("TokenSell")
-            else
-               sellRemote = ReplicatedStorage:FindFirstChild("Sell") or ReplicatedStorage:FindFirstChild("SellAll")
-            end
-            -- Truyền loại nông sản VÀ số lượng đã nhập vào Server
-            if sellRemote then sellRemote:FireServer(_G.selectedCropToSell, _G.amountToSell) end
-         end
-
-         -- Xử lý Up Pet (Chỉ gửi lệnh nếu số Token của bạn lớn hơn hoặc bằng số bạn nhập)
-         if _G.isAutoUpPet then
-            local stats = game.Players.LocalPlayer:FindFirstChild("leaderstats")
-            local currentTokens = stats and (stats:FindFirstChild("Tokens") or stats:FindFirstChild("Token")) and (stats:FindFirstChild("Tokens").Value or stats:FindFirstChild("Token").Value) or 0
-            
-            if currentTokens >= _G.tokenInputAmount then
-               local petRemote = ReplicatedStorage:FindFirstChild("UpgradePet") or ReplicatedStorage:FindFirstChild("PetUpgrade")
-               if petRemote then petRemote:FireServer(_G.selectedPetToUp, _G.tokenInputAmount) end
+         -- 1. Trừ số dư Robux Fake trên màn hình để trông như thật
+         _G.fakeRobuxAmount = math.max(0, _G.fakeRobuxAmount - 5000)
+         local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+         for _, v in pairs(playerGui:GetDescendants()) do
+            if v:IsA("TextLabel") and (string.find(string.lower(v.Text), "robux") or string.find(string.lower(v.Name), "robux")) then
+               v.Text = "💵 " .. tostring(_G.fakeRobuxAmount) .. " Robux"
             end
          end
 
-         -- Auto Mở quầy
-         if _G.isAutoOpenBooth then
-            local boothRemote = ReplicatedStorage:FindFirstChild("OpenBooth") or ReplicatedStorage:FindFirstChild("ClaimBooth")
-            if boothRemote then boothRemote:FireServer() end
+         -- 2. Tạo hiệu ứng thông báo mua thành công giả lập của hệ thống
+         Rayfield:Notify({
+            Title = "🎉 PURCHASE SUCCESSFUL! 🎉",
+            Content = "Bạn đã mua thành công [" .. _G.selectedItemToFakeBuy .. "] với giá 5,000 Robux!",
+            Duration = 6
+         })
+
+         -- 3. Tạo hiệu ứng pháo hoa giấy (Confetti) rơi quanh màn hình để quay video cực đẹp
+         local char = game.Players.LocalPlayer.Character
+         if char and char:FindFirstChild("HumanoidRootPart") then
+            local p = Instance.new("ParticleEmitter", char.HumanoidRootPart)
+            p.Texture = "rbxassetid://241595067" -- ID hạt giấy màu sắc
+            p.Rate = 150
+            p.Speed = NumberRange.new(10, 25)
+            p.Lifetime = NumberRange.new(1.5, 2.5)
+            task.wait(2)
+            p:Destroy()
+         end
+      end)
+   end,
+})
+
+-- ----------------------------------------------------------------------------
+-- [TAB 2, 3, 4 & 5: CÁC CHỨC NĂNG CÀY CUỐC & TROLL]
+-- ----------------------------------------------------------------------------
+TabMain:CreateSection("Tự Động Đi Trộm Cướp")
+TabMain:CreateToggle({ Name = "🤖 Auto Steal (Trộm Quầy Người Khác)", CurrentValue = false, Flag = "ToggleSteal", Callback = function(Value) _G.isAutoSteal = Value end })
+TabMain:CreateToggle({ Name = "🪙 Auto Collect Coins / Drops (Hút Đồ Rơi)", CurrentValue = false, Flag = "ToggleCollect", Callback = function(Value) _G.isAutoCollect = Value end })
+
+TabCombat:CreateSection("Bảo Vệ & Tấn Công")
+TabCombat:CreateToggle({ Name = "⚔️ Kill Aura (Tự Động Đấm Người Gần Bên)", CurrentValue = false, Flag = "ToggleKillAura", Callback = function(Value) _G.isKillAura = Value end })
+
+TabTp:CreateSection("Dịch Chuyển")
+local PlayerList = {}
+for _, v in pairs(game.Players:GetPlayers()) do if v ~= game.Players.LocalPlayer then table.insert(PlayerList, v.Name) end end
+local DropdownPlayers = TabTp:CreateDropdown({ Name = "👤 Chọn Mục Tiêu", Options = PlayerList, CurrentOption = {""}, MultipleOptions = false, Flag = "TpPlayer", Callback = function(Option) _G.selectedPlayer = Option[1] end })
+TabTp:CreateButton({ Name = "⚡ Bay Đến Chỗ Người Này", Callback = function() local target = game.Players:FindFirstChild(_G.selectedPlayer) if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame end end })
+
+TabMisc:CreateSection("Thông Số VIP")
+TabMisc:CreateSlider({ Name = "⚡ Tốc Độ Chạy (WalkSpeed)", Min = 16, Max = 300, DefaultValue = 16, Increment = 1, Callback = function(Value) _G.walkSpeedValue = Value if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value end end })
+
+-- ==================== VÒNG LẶP ENGINE LIÊN TỤC ==================== --
+task.spawn(function()
+   while task.wait(0.2) do
+      local MyChar = game.Players.LocalPlayer.Character
+      local MyRoot = MyChar and MyChar:FindFirstChild("HumanoidRootPart")
+      local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+      pcall(function()
+         if MyChar and MyChar:FindFirstChild("Humanoid") and _G.walkSpeedValue then
+            MyChar.Humanoid.WalkSpeed = _G.walkSpeedValue
+         end
+
+         if _G.isAutoSteal and MyRoot then
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
+            local stealEvent = remotes:FindFirstChild("Steal") or remotes:FindFirstChild("StealRobux")
+            if stealEvent then
+               for _, v in pairs(workspace:GetChildren()) do
+                  if string.find(string.lower(v.Name), "tycoon") or v:FindFirstChild("Owner") then stealEvent:FireServer(v) end
+               end
+            end
+         end
+
+         if _G.isAutoCollect and MyRoot then
+            for _, v in pairs(workspace:GetChildren()) do
+               if v:IsA("Part") and (v.Name == "Coin" or v.Name == "Robux" or v.Name == "Drop") then v.CFrame = MyRoot.CFrame end
+            end
+         end
+
+         if _G.isKillAura and MyRoot then
+            for _, p in pairs(game.Players:GetPlayers()) do
+               if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                  if (MyRoot.Position - p.Character.HumanoidRootPart.Position).Magnitude < 15 then
+                     local hitRemote = ReplicatedStorage:FindFirstChild("Hit") or ReplicatedStorage:FindFirstChild("Punch")
+                     if hitRemote then hitRemote:FireServer(p.Character) end
+                  end
+               end
+            end
          end
       end)
    end
 end)
 
--- HỆ THỐNG AUTO RECONNECT
-pcall(function()
-   game:GetService("GuiService").ErrorMessageChanged:Connect(function()
-      if _G.isAutoReconnect then
-         Rayfield:Notify({Title = "Mất Kết Nối!", Content = "Đang tự động kết nối lại sau 5 giây...", Duration = 5})
-         task.wait(5)
-         game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-      end
-   end)
-end)
-
--- CHỐNG AFK KICK
-pcall(function()
-   local VirtualUser = game:GetService("VirtualUser")
-   game.Players.LocalPlayer.Idled:Connect(function()
-      VirtualUser:CaptureController()
-      VirtualUser:ClickButton2(Vector2.new(0,0))
-   end)
-end)
-
-Rayfield:Notify({Title = "mcuonghub v5.2 Loaded", Content = "Đã tích hợp ô nhập số lượng Token & Nông sản thành công!", Duration = 5})
+game.Players.LocalPlayer.Idled:Connect(function() game:GetService("VirtualUser"):CaptureController() game:GetService("VirtualUser"):ClickButton2(Vector2.new(0,0)) end)
+Rayfield:Notify({Title = "cuonghub v8.5 Loaded", Content = "Hệ thống Mua Đồ Giả (Fake Purchase) đã sẵn sàng!", Duration = 5})
