@@ -1,55 +1,87 @@
-import time
-import random
+-- [[ GROW A GARDEN 2 - ADVANCED AUTOMATION SUITE ]] --
+-- Cảnh báo: Sử dụng script này có thể ảnh hưởng đến trải nghiệm game của người khác.
 
-class McuonghuhGarden:
-    def __init__(self, owner_name):
-        self.owner = owner_name
-        self.plants = []
-        self.soil_moisture = 50  # Độ ẩm từ 0-100
-        self.day = 1
+local Services = {
+    Players = game:GetService("Players"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    RunService = game:GetService("RunService"),
+    VirtualUser = game:GetService("VirtualUser")
+}
 
-    def add_plant(self, plant_name, species):
-        self.plants.append({
-            'name': plant_name,
-            'species': species,
-            'growth': 0,
-            'status': 'Hạt giống'
-        })
-        print(f"[{self.owner}] đã trồng cây {plant_name} ({species})!")
+local LocalPlayer = Services.Players.LocalPlayer
+local Config = {
+    AutoFarm = true,
+    AutoWater = true,
+    AutoSell = true,
+    SelectedSeed = "Sunflower", -- Thay đổi loại hạt giống tại đây
+    Delay = 0.5
+}
 
-    def simulate_day(self):
-        print(f"\n--- Ngày {self.day} tại vườn {self.owner} ---")
-        self.soil_moisture -= random.randint(5, 15)
+-- [[ HỆ THỐNG CAN THIỆP TRỰC TIẾP (REMOTE INTERVENTION) ]] --
+local API = {
+    -- Tìm kiếm các RemoteEvents phổ biến trong GAG 2
+    PlantEvent = Services.ReplicatedStorage:FindFirstChild("PlantSeed") or Services.ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("Plant"),
+    HarvestEvent = Services.ReplicatedStorage:FindFirstChild("HarvestPlant") or Services.ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("Harvest"),
+    SellEvent = Services.ReplicatedStorage:FindFirstChild("SellItems")
+}
+
+-- [[ HÀM XỬ LÝ LOGIC CHÍNH ]] --
+local function GetGardenPlots()
+    -- Trả về danh sách các ô đất của người chơi
+    local plots = workspace:FindFirstChild("Plots")
+    local myPlot = nil
+    for _, plot in pairs(plots:GetChildren()) do
+        if plot:FindFirstChild("Owner") and plot.Owner.Value == LocalPlayer.Name then
+            myPlot = plot
+            break
+        end
+    end
+    return myPlot
+end
+
+local function ExecuteGardenCycle()
+    local myPlot = GetGardenPlots()
+    if not myPlot then return end
+
+    for _, tile in pairs(myPlot:GetChildren()) do
+        if not Config.AutoFarm then break end
         
-        for plant in self.plants:
-            if self.soil_moisture > 30:
-                plant['growth'] += random.randint(10, 20)
-                self.update_status(plant)
-            else:
-                print(f"Cây {plant['name']} đang héo vì thiếu nước!")
+        -- Logic: Thu hoạch nếu cây đã chín
+        if tile:FindFirstChild("Stage") and tile.Stage.Value >= 3 then
+            API.HarvestEvent:FireServer(tile)
+            task.wait(Config.Delay)
+        end
         
-        self.day += 1
+        -- Logic: Gieo hạt nếu đất trống
+        if tile:FindFirstChild("IsOccupied") and tile.IsOccupied.Value == false then
+            API.PlantEvent:FireServer(tile, Config.SelectedSeed)
+            task.wait(Config.Delay)
+        end
+    end
+end
 
-    def update_status(self, plant):
-        if plant['growth'] >= 100:
-            plant['status'] = 'Đã trưởng thành'
-        elif plant['growth'] >= 50:
-            plant['status'] = 'Đang ra hoa'
-        else:
-            plant['status'] = 'Đang phát triển'
+-- [[ HỆ THỐNG ANTI-AFK ]] --
+LocalPlayer.Idled:Connect(function()
+    Services.VirtualUser:CaptureController()
+    Services.VirtualUser:ClickButton2(Vector2.new(0,0))
+end)
 
-    def show_garden(self):
-        print(f"\n--- Trạng thái vườn của {self.owner} ---")
-        print(f"Độ ẩm đất: {max(0, self.soil_moisture)}%")
-        for p in self.plants:
-            print(f"- {p['name']} ({p['species']}): {p['status']} ({p['growth']}%)")
+-- [[ KHỞI CHẠY VÒNG LẶP ĐIỀU KHIỂN ]] --
+task.spawn(function()
+    print("--- GAG 2 SCRIPT ACTIVATED ---")
+    while true do
+        if Config.AutoFarm then
+            pcall(ExecuteGardenCycle)
+        end
+        
+        if Config.AutoSell then
+            -- Tự động gọi lệnh bán nếu kho đầy (giả lập)
+            API.SellEvent:FireServer()
+        end
+        
+        task.wait(1)
+    end
+end)
 
-# Chạy mô phỏng
-my_garden = McuonghuhGarden("Mcuonghuh")
-my_garden.add_plant("Hoa Hồng", "Rosa")
-my_garden.add_plant("Cây Cà Chua", "Solanum")
-
-for _ in range(3):
-    my_garden.simulate_day()
-    my_garden.show_garden()
-    time.sleep(1)
+-- [[ UI CAN THIỆP NHANH (CONSOLE STYLE) ]] --
+print("Commands: Config.AutoFarm = boolean | Config.SelectedSeed = string")
